@@ -34,7 +34,6 @@ class DBManager():
                 with conn.cursor() as cur:
                     cur.execute(f"SELECT name_employer, COUNT(*) as count_vacancy FROM vacancies group by name_employer;")
                     rows = cur.fetchall()
-                    print(rows)
                     for row in rows:
                         print(row)
         except psycopg2.InterfaceError:
@@ -51,7 +50,6 @@ class DBManager():
                 with conn.cursor() as cur:
                     cur.execute(f"SELECT vacancies.name_employer, vacancies.name_vacancies, (vacancies.salary_min + vacancies.salary_max)/2 as salary, url FROM vacancies")
                     rows = cur.fetchall()
-                    print(rows)
                     for row in rows:
                         print(row)
         except psycopg2.InterfaceError:
@@ -59,11 +57,29 @@ class DBManager():
 
     def get_avg_salary(self):
         """получает среднюю зарплату по вакансиям"""
-        pass
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        f"SELECT ROUND(AVG(vacancies.salary_min + vacancies.salary_max)/2) FROM vacancies;")
+                    rows = cur.fetchall()
+                    for row in rows:
+                        print(row)
+        except psycopg2.InterfaceError:
+            print('ошибка в получении вакансии')
 
     def get_vacancies_with_higher_salary(self):
         """получает список всех вакансий, у которых зарплата выше средней по всем вакансиям"""
-        pass
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        f"SELECT name_employer, name_vacancies, url FROM vacancies WHERE salary_min > (SELECT ROUND(AVG((salary_min + salary_max)/2)) FROM vacancies WHERE vacancies.salary_min<>0 and vacancies.salary_max<>0);")
+                    rows = cur.fetchall()
+                    for row in rows:
+                        print(row)
+        except psycopg2.InterfaceError:
+            print('ошибка в получении вакансии')
 
     def get_vacancies_with_keyword(self):
         """получает список всех вакансий, в названии которых содержатся переданные в метод слова"""
