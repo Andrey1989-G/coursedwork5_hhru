@@ -1,4 +1,6 @@
 # обрабатывает данные в БД.
+import psycopg2
+
 from services.dbconnect import conn
 from data.data_with_employer import list_with_employer
 from services.input_error import Input_error
@@ -30,14 +32,13 @@ class DBManager():
         try:
             with conn:
                 with conn.cursor() as cur:
-                    for employer in list_with_employer:
-                        cur.execute(f"select count(name_employer) from vacancies where name_employer={employer}")
-                        rows = cur.fetchall()
-                        for row in rows:
-                            print(row)
-        finally:
-            # закрытие соединения
-            conn.close()
+                    cur.execute(f"SELECT name_employer, COUNT(*) as count_vacancy FROM vacancies group by name_employer;")
+                    rows = cur.fetchall()
+                    print(rows)
+                    for row in rows:
+                        print(row)
+        except psycopg2.InterfaceError:
+            print('ошибка в получении вакансии')
 
 
     def get_all_vacancies(self):
@@ -45,7 +46,16 @@ class DBManager():
         получает список всех вакансий с указанием
         названия компании, названия вакансии и зарплаты и ссылки на вакансию
         """
-        pass
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(f"SELECT vacancies.name_employer, vacancies.name_vacancies, (vacancies.salary_min + vacancies.salary_max)/2 as salary, url FROM vacancies")
+                    rows = cur.fetchall()
+                    print(rows)
+                    for row in rows:
+                        print(row)
+        except psycopg2.InterfaceError:
+            print('ошибка в получении вакансии')
 
     def get_avg_salary(self):
         """получает среднюю зарплату по вакансиям"""

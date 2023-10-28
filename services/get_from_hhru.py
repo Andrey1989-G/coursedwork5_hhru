@@ -24,6 +24,6 @@ class HeadHunterAPI(GetInfo):
 #
 # s = HeadHunterAPI()
 # # print(len(s.get_vacancies('ситно')))
-# res = s.get_vacancies('ситно')
+# res = s.get_vacancies('Игрушка маркер')
 # for i in res['items']:
 #     print(i)

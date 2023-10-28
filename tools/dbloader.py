@@ -32,39 +32,59 @@ class DBLoader(HeadHunterAPI, Input_error):
                 with conn.cursor() as cur:
                     for item in downloades_data['items']:
                         salary = item['salary']
-                        salary_range = f"{salary['from']}-{salary['to']}, валюта {salary['currency']}" if salary and salary[
-                            'from'] and salary['to'] else "Не указано"
+                        if salary is not None:
+                            salary_min = salary['from']
+                            salary_max = salary['to']
+                            salary_currency = salary['currency'] if salary['currency'] else "Не указано"
+                        else:
+                            salary_min = 0
+                            salary_max = 0
+                            salary_currency = 'НЕТ'
                         vacancy = []
                         res = {
                             "id вакансии": int(item['id']),
+                            "название работодателя": item["employer"]["name"],
                             "Название вакансии": item['name'],
-                            "Заработная плата": salary_range,
+                            "Заработная плата min": salary_min,
+                            "Заработная плата max": salary_max,
+                            "Валюта": salary_currency,
                             "Город": item["area"]["name"],
                             "Требование": item['snippet']['requirement'],
                             "Обязанности": item['snippet']['responsibility'],
                             "cсылка": item['url'],
                             "id работодателя": int(item["employer"]["id"]),
-                            "название работодателя": item["employer"]["name"],
                         }
                         vacancy.append(res)
-                        # print(vacancy)
+                        print(vacancy)
                         # заполнение таблицы vacancies
                         cur.execute(
-                            "INSERT INTO vacancies (id_vacancies, name_vacancies,"
-                            "salary, city, requirement, responsibility, url, id_employer, name_employer)"
-                            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            "INSERT INTO vacancies (id_vacancies, name_employer, name_vacancies,"
+                            "salary_min, salary_max, salary_currency, city, requirement, responsibility, "
+                            "url, id_employer)"
+                            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
                             (vacancy[0]["id вакансии"],
+                             vacancy[0]["название работодателя"],
                              vacancy[0]["Название вакансии"],
-                             vacancy[0]["Заработная плата"],
+                             vacancy[0]["Заработная плата min"],
+                             vacancy[0]["Заработная плата max"],
+                             vacancy[0]["Валюта"],
                              vacancy[0]["Город"],
                              vacancy[0]["Требование"],
                              vacancy[0]["Обязанности"],
                              vacancy[0]["cсылка"],
                              vacancy[0]["id работодателя"],
-                             vacancy[0]["название работодателя"])
+                             )
                             )
+
+                    # rows = cur.fetchall()
+                    # for row in rows:
+                    #     print(row)
+        except psycopg2.InterfaceError:
+            print('не записано в бд')
         except psycopg2.errors.UniqueViolation:
             print('ошибка: повтор id вакансии')
+        except TypeError:
+            print('вакансия без зп')
     # # закрытие соединения
     #     finally:
     #         conn.close()
