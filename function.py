@@ -22,8 +22,9 @@ def main_theme():
     s = DBManager()
     # s.get_companies_and_vacancies_count()
     # s.get_all_vacancies()
-    s.get_avg_salary()
-    s.get_vacancies_with_higher_salary()
+    # s.get_avg_salary()
+    # s.get_vacancies_with_higher_salary()
+    s.get_vacancies_with_keyword('способ')
 
 
 

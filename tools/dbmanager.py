@@ -48,7 +48,8 @@ class DBManager():
         try:
             with conn:
                 with conn.cursor() as cur:
-                    cur.execute(f"SELECT vacancies.name_employer, vacancies.name_vacancies, (vacancies.salary_min + vacancies.salary_max)/2 as salary, url FROM vacancies")
+                    cur.execute(f"SELECT vacancies.name_employer, vacancies.name_vacancies, (vacancies.salary_min + vacancies.salary_max)/2 as salary, url "
+                                f"FROM vacancies")
                     rows = cur.fetchall()
                     for row in rows:
                         print(row)
@@ -61,7 +62,8 @@ class DBManager():
             with conn:
                 with conn.cursor() as cur:
                     cur.execute(
-                        f"SELECT ROUND(AVG(vacancies.salary_min + vacancies.salary_max)/2) FROM vacancies;")
+                        f"SELECT ROUND(AVG(vacancies.salary_min + vacancies.salary_max)/2) "
+                        f"FROM vacancies;")
                     rows = cur.fetchall()
                     for row in rows:
                         print(row)
@@ -74,16 +76,33 @@ class DBManager():
             with conn:
                 with conn.cursor() as cur:
                     cur.execute(
-                        f"SELECT name_employer, name_vacancies, url FROM vacancies WHERE salary_min > (SELECT ROUND(AVG((salary_min + salary_max)/2)) FROM vacancies WHERE vacancies.salary_min<>0 and vacancies.salary_max<>0);")
+                        f"SELECT name_employer, name_vacancies, url "
+                        f"FROM vacancies "
+                        f"WHERE salary_min > (SELECT ROUND(AVG((salary_min + salary_max)/2)) "
+                        f"FROM vacancies WHERE vacancies.salary_min<>0 and vacancies.salary_max<>0);")
                     rows = cur.fetchall()
                     for row in rows:
                         print(row)
         except psycopg2.InterfaceError:
             print('ошибка в получении вакансии')
 
-    def get_vacancies_with_keyword(self):
+    def get_vacancies_with_keyword(self, keyword: str):
         """получает список всех вакансий, в названии которых содержатся переданные в метод слова"""
-        pass
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """SELECT name_employer, name_vacancies, requirement, url 
+                        FROM vacancies 
+                        WHERE requirement LIKE %s;
+                        """,
+                        (f"%{keyword}%",)
+                    )
+                    rows = cur.fetchall()
+                    for row in rows:
+                        print(row)
+        except psycopg2.InterfaceError:
+            print('ошибка в получении вакансии')
 
 
 
