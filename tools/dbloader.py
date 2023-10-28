@@ -55,7 +55,7 @@ class DBLoader(HeadHunterAPI, Input_error):
                             "id работодателя": int(item["employer"]["id"]),
                         }
                         vacancy.append(res)
-                        print(vacancy)
+                        # print(vacancy)
                         # заполнение таблицы vacancies
                         cur.execute(
                             "INSERT INTO vacancies (id_vacancies, name_employer, name_vacancies,"
@@ -84,7 +84,7 @@ class DBLoader(HeadHunterAPI, Input_error):
         except psycopg2.errors.UniqueViolation:
             print('ошибка: повтор id вакансии')
         except TypeError:
-            print('вакансия без зп')
+            print()
     # # закрытие соединения
     #     finally:
     #         conn.close()
